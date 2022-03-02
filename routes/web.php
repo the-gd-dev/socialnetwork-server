@@ -1,0 +1,51 @@
+<?php
+
+/** @var \Laravel\Lumen\Routing\Router $router */
+
+/*
+|--------------------------------------------------------------------------
+| Application Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register all of the routes for an application.
+| It is a breeze. Simply tell Lumen the URIs it should respond to
+| and give it the Closure to call when that URI is requested.
+|
+*/
+// API route group
+$router->group(['prefix' => 'api/v1'], function () use ($router) {
+    $router->group(['prefix' => 'utilities'], function () use ($router) {
+        $router->get('languages', 'V1\UtilitiesController@getLanguages');
+        $router->get('reactions', 'V1\UtilitiesController@getReactions');
+        $router->get('privacies', 'V1\UtilitiesController@getPrivacies');
+    });
+
+    $router->group(['prefix' => 'friend'], function () use ($router) {
+        $router->get('requests', 'V1\FriendsController@friendRequests');
+        $router->post('add', 'V1\FriendsController@addFriend');
+        $router->post('remove', 'V1\FriendsController@removeFriendRequest');
+        $router->post('confirm', 'V1\FriendsController@confirmFriendRequest');
+    });
+    $router->group(['prefix' => 'comments'], function () use ($router) {
+        $router->get('all', 'V1\CommentsController@index');
+        $router->post('add', 'V1\CommentsController@store');
+        $router->post('remove', 'V1\CommentsController@destroy');
+    });
+    // Matches "/api/register
+    $router->post('register', 'V1\AuthController@register');
+    // Matches "/api/login
+    $router->post('login', 'V1\AuthController@login');
+
+    // Matches "/api/profile
+    $router->get('profile', 'V1\UserController@profile');
+
+    //get one user by id
+    $router->get('people', 'V1\PeopleController@randomPeople');
+    $router->get('remove-person', 'V1\PeopleController@removePerson');
+    $router->get('users/{id}', 'V1\UserController@singleUser');
+
+    // Posts -> APIs
+    $router->post('posts/create', 'V1\PostsController@create');
+    $router->get('posts', 'V1\PostsController@posts');
+    $router->get('posts/{postId}', 'V1\PostsController@getPost');
+});
