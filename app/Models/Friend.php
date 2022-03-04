@@ -5,7 +5,6 @@ use Illuminate\Database\Eloquent\Model;
 class Friend extends Model
 {
     protected $table = 'friends';
-    protected $with = ['user'];
     /**
      * The attributes that are mass assignable.
      *
@@ -20,6 +19,9 @@ class Friend extends Model
         'is_friends',
         'is_followed'
     ];
+    public function request(){
+        return $this->hasOne(User::class, 'id', 'user_id');
+    }
     public function user(){
         return $this->hasOne(User::class, 'id', 'friend_id');
     }

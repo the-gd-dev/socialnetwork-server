@@ -23,7 +23,7 @@ class CreateUsersTable extends Migration
             $table->string('email',100)->unique()->notNullable();
             $table->string('alt_email',100)->unique()->nullable();
             $table->string('password');
-            $table->string('phone_number')->unique()->notNullable();
+            $table->string('phone_number', 100)->unique()->notNullable();
             $table->string('alt_phone_number')->nullable();
             $table->enum('is_deactivated',[0,1])->default(0);
             $table->enum('is_disabled',[0,1])->default(0);

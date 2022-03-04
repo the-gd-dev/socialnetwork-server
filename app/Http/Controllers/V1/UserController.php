@@ -35,24 +35,21 @@ class UserController extends Controller
     }
 
     /**
-     * Get all User.
-     *
-     * @return Response
-     */
-    public function allUsers()
-    {
-         return response()->json(['users' =>  User::all()], 200);
-    }
-
-    /**
      * Get one user.
      *
      * @return Response
      */
     public function singleUser($id)
     {
+        $user = User::with('user_meta');
+        $uuid = strlen($id) === 36 ? $id : null;
+        if(strlen($id) === 36){
+            $user = $user->where('uuid',$uuid)->first();
+        }else{
+            $user = $user->where('id',$id)->first();
+        }
+        
         try {
-            $user = User::with('user_meta')->where('id',$id)->orWhere('uuid',$id)->first();
             if(!$user) {
                 return response()->json(['message' => 'user not found!', 'error' => 'User not found.'], 404);
             }

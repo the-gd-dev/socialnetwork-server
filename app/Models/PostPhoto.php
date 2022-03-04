@@ -3,22 +3,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-class Post extends Model
+class PostPhoto extends Model
 {
     use HasFactory;
     protected $fillable = [
         'user_id',
         'post_id',
-        'text',
-        'reaction_id',
-        'privacy_id',
-        'location'
+        'name',
+        'original_name',
+        'url',
+        'dimensions',
+        'mime',
+        'size'
     ];
-    protected $table = 'posts';
+    protected $table = 'photos';
     public function user(){
         return $this->belongsTo(User::class);
-    }
-    public function photos(){
-        return $this->hasMany(PostPhoto::class, 'post_id', 'id');
     }
 }

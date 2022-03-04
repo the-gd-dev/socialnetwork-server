@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers\V1;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use  App\Models\User;
 use  App\Models\Friend;
-use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 
 class FriendsController extends Controller
@@ -15,11 +13,27 @@ class FriendsController extends Controller
      *
      * @return void
      */
-    protected $user;
-    public function __construct(User $user)
+    public function __construct()
     {
-        $this->user = $user;
         $this->middleware('auth');
+    }
+    
+    /**
+     * get friends list
+     * @param Request
+     * @return $friend
+     */
+    public function friends(Request $request){
+        $query = Friend::query();
+        $friends = $query->where('user_id', User::where('uuid', $request->userId)->first()->id)
+                        ->where('is_friends', '1')
+                        ->with([
+                            'user' => function($q){$q->select('id','uuid', 'name','first_name', 'middle_name', 'last_name'); }, 
+                            'user.user_meta' => function ($q) { $q->select('user_id', 'display_picture', 'bio_text'); }
+                        ])
+                        ->latest()
+                        ->get();
+        return response()->json(['friends' => $friends, 'message' => 'Friends fetched successfull.'], 200);
     }
     /**
      * get friend requests list
@@ -27,18 +41,23 @@ class FriendsController extends Controller
      * @return $friend
      */
     public function friendRequests(Request $request){
-        $query = Friend::with([
-            'user' => function($q){$q->select('id','uuid', 'name','first_name', 'middle_name', 'last_name'); }, 
-            'user.user_meta' => function ($q) { $q->select('user_id', 'display_picture'); }
-        ]);
+        $query = Friend::query();
         if($request->type == 'sent'){
             $requests =  $query->where('user_id', auth()->user()->id)
+                               ->with([
+                                    'user' => function($q){$q->select('id','uuid', 'name','first_name', 'middle_name', 'last_name'); }, 
+                                    'user.user_meta' => function ($q) { $q->select('user_id', 'display_picture'); }
+                                ])
                                ->where('is_friends', '0')
                                ->latest()
                                ->get();
         }else{
             $requests =  $query->where('friend_id', auth()->user()->id)
                                ->where('is_friends', '0')
+                               ->with([
+                                    'request' => function($q){$q->select('id','uuid', 'name','first_name', 'middle_name', 'last_name'); }, 
+                                    'request.user_meta' => function ($q) { $q->select('user_id', 'display_picture'); }
+                                ])
                                ->latest()
                                ->get();
         }
@@ -67,8 +86,7 @@ class FriendsController extends Controller
      * @return $friend
      */
     public function removeFriendRequest(Request $request){
-        $friendId = User::where('uuid',  $request->id)->first()->id;
-        $remove = Friend::where('friend_id', $friendId)->where('user_id', auth()->user()->id)->delete();
+        $remove = Friend::find($request->id)->delete();
         return response()->json(['message' => 'Friend request removed.'],200);
     }
     /**
@@ -77,6 +95,9 @@ class FriendsController extends Controller
      * @return $friend
      */
     public function confirmFriendRequest(Request $request){
-        
+        $friend = Friend::find($request->id)->update([
+            'is_friends' =>  '1'
+        ]);
+        return response()->json(['friend' => $friend, 'message' => 'Friend request confirmed.'],200);
     }
 }

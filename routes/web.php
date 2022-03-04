@@ -19,12 +19,16 @@ $router->group(['prefix' => 'api/v1'], function () use ($router) {
         $router->get('reactions', 'V1\UtilitiesController@getReactions');
         $router->get('privacies', 'V1\UtilitiesController@getPrivacies');
     });
-
-    $router->group(['prefix' => 'friend'], function () use ($router) {
+    $router->group(['prefix' => 'photos'], function () use ($router) {
+        $router->get('delete', 'V1\PhotosController@destroy');
+        $router->get('/', 'V1\PhotosController@photos');
+    });
+    $router->group(['prefix' => 'friends'], function () use ($router) {
         $router->get('requests', 'V1\FriendsController@friendRequests');
         $router->post('add', 'V1\FriendsController@addFriend');
         $router->post('remove', 'V1\FriendsController@removeFriendRequest');
         $router->post('confirm', 'V1\FriendsController@confirmFriendRequest');
+        $router->get('/', 'V1\FriendsController@friends');
     });
     $router->group(['prefix' => 'comments'], function () use ($router) {
         $router->get('all', 'V1\CommentsController@index');
@@ -38,14 +42,16 @@ $router->group(['prefix' => 'api/v1'], function () use ($router) {
 
     // Matches "/api/profile
     $router->get('profile', 'V1\UserController@profile');
+    $router->get('users/{id}', 'V1\UserController@singleUser');
 
     //get one user by id
     $router->get('people', 'V1\PeopleController@randomPeople');
     $router->get('remove-person', 'V1\PeopleController@removePerson');
-    $router->get('users/{id}', 'V1\UserController@singleUser');
+    
 
     // Posts -> APIs
     $router->post('posts/create', 'V1\PostsController@create');
     $router->get('posts', 'V1\PostsController@posts');
     $router->get('posts/{postId}', 'V1\PostsController@getPost');
+    $router->post('delete-post', 'V1\PostsController@destroy');
 });
