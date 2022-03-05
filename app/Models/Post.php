@@ -15,8 +15,14 @@ class Post extends Model
         'location'
     ];
     protected $table = 'posts';
+    public function comments(){
+        return $this->hasMany(Comment::class, 'post_id', 'id');
+    }
     public function user(){
         return $this->belongsTo(User::class);
+    }
+    public function reaction(){
+        return $this->hasOne(Reaction::class, 'id', 'reaction_id' );
     }
     public function photos(){
         return $this->hasMany(PostPhoto::class, 'post_id', 'id');

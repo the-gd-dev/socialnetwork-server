@@ -50,8 +50,13 @@ $router->group(['prefix' => 'api/v1'], function () use ($router) {
     
 
     // Posts -> APIs
-    $router->post('posts/create', 'V1\PostsController@create');
-    $router->get('posts', 'V1\PostsController@posts');
-    $router->get('posts/{postId}', 'V1\PostsController@getPost');
-    $router->post('delete-post', 'V1\PostsController@destroy');
+    $router->group(['prefix' => 'posts'], function () use ($router) {
+        $router->get('/', 'V1\PostsController@posts');
+        $router->get('/{postId}', 'V1\PostsController@getPost');
+        $router->post('create', 'V1\PostsController@create');
+        $router->post('delete', 'V1\PostsController@destroy');
+        $router->post('reaction', 'V1\PostsController@setReaction');
+        $router->post('privacy', 'V1\PostsController@setPrivacy');
+    });
+    
 });

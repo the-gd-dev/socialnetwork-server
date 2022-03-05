@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V1;
 use App\Http\Controllers\Controller;
+use App\Models\Comment;
 use Illuminate\Support\Facades\Auth;
 use  App\Models\Post;
 use App\Models\PostPhoto;
@@ -22,7 +23,7 @@ class PostsController extends Controller
     {
         $this->middleware('auth');
         $this->post = $post;
-        $this->user = Auth::user();
+        $this->user = User::with('user_meta')->find(Auth::user()->id);
     }
     /**
      * Create Authenticated User Post.
@@ -32,7 +33,17 @@ class PostsController extends Controller
     public function posts(Request $request)
     {
         $query = $this->post->with([
+            'reaction',
             'photos',
+            'comments' => function($q){
+                $q->latest()->first();
+            }, 
+            'comments.user' => function($q){
+                $q->select('id','uuid', 'name','first_name', 'middle_name', 'last_name');
+            }, 
+            'comments.user.user_meta' => function ($q) {
+                $q->select('user_id', 'display_picture');
+            },
             'user' => function($q){
                 $q->select('id','uuid', 'name','first_name', 'middle_name', 'last_name');
             }, 
@@ -97,6 +108,8 @@ class PostsController extends Controller
     public function getPost($postId)
     {
         $post = $this->post->with([
+            'reaction',
+            'photos',
             'user' => function($q){
                 $q->select('id','uuid', 'name','first_name', 'middle_name', 'last_name');
             }, 
@@ -116,11 +129,52 @@ class PostsController extends Controller
      */
     
     public function destroy(Request $request){
+       
         $post = $this->post->find($request->post_id);
         if(!isset($post)){
             return response()->json(['message' => 'Error','errors' => 'Post not found.'], 404);
         }
+        Comment::where('post_id', $post->id)->delete();
+        $photos = PostPhoto::where('post_id', $post->id)->get();
+        foreach ($photos as $key => $photo) {
+           if($photo->url !== $this->user->user_meta->display_picture){
+            unlink(base_path()."\storage\app\public\post-images\\".$this->user->id.'\\'.$photo->name);
+            $photo->delete();
+           }
+        }
         $post->delete();
         return response()->json(['message' => 'Post deleted.'], 200);
+    }
+    /**
+     * set resource privacy.
+     *
+     * @return Response
+     */
+    
+    public function setPrivacy(Request $request){
+        $post = $this->post->find($request->post_id);
+        if(!isset($post)){
+            return response()->json(['message' => 'Error','errors' => 'Post not found.'], 404);
+        }
+        $post->update([
+            'privacy_id' => $request->privacy_id
+        ]);
+        return response()->json(['post' => $post, 'message' => 'Post privacy updated.'], 200);
+    }
+
+    /**
+     * set resource reaction.
+     *
+     * @return Response
+     */
+    public function setReaction(Request $request){
+        $post = $this->post->find($request->post_id);
+        if(!isset($post)){
+            return response()->json(['message' => 'Error','errors' => 'Post not found.'], 404);
+        }
+        $post->update([
+            'reaction_id' => $request->reaction_id
+        ]);
+        return response()->json(['post' => $post, 'message' => 'Post reaction updated.'], 200);
     }
 }

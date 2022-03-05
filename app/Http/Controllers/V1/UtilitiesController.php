@@ -13,6 +13,9 @@ class UtilitiesController extends Controller
      */
     public function getReactions(Request $request){
         $reactions = Reaction::all();
+        foreach ($reactions as  $value) {
+            $value->selected = false;
+        }
         return response()->json(['reactions' => $reactions], 200);
     }
     
