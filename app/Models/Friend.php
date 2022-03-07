@@ -19,10 +19,10 @@ class Friend extends Model
         'is_friends',
         'is_followed'
     ];
-    public function request(){
-        return $this->hasOne(User::class, 'id', 'user_id');
+    public function friend(){
+        return $this->hasOne(User::class, 'id', 'friend_id');
     }
     public function user(){
-        return $this->hasOne(User::class, 'id', 'friend_id');
+        return $this->hasOne(User::class, 'id', 'user_id');
     }
 }

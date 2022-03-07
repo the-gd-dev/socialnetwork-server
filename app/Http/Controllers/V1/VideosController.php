@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\V1;
 use App\Http\Controllers\Controller;
-use  App\Models\PostPhoto;
+use  App\Models\PostVideo;
 use App\Models\User;
 use App\Models\UserMeta;
 use Illuminate\Http\Request;
 
-class PhotosController extends Controller
+class VideosController extends Controller
 {
      /**
      * Instantiate a new PhotosController instance.
@@ -20,37 +20,34 @@ class PhotosController extends Controller
     }
     
     /**
-     * get friends list
+     * get vidoes list
      * @param Request
      * @return $friend
      */
-    public function photos(Request $request){
-        $query = PostPhoto::query();
+    public function videos(Request $request){
+        $query = PostVideo::query();
         $userId = User::where('uuid', $request->userId)->first()->id;
-        $photos = $query->with([
+        $videos = $query->with([
                             'user' => function($q){ $q->select('id','uuid'); },
-                            'user.user_meta'  => function($q){ $q->select('user_id','display_picture', 'cover'); },
                         ])
                         ->where('user_id', $userId)
                         ->latest()
                         ->get();
-        return response()->json(['photos' => $photos, 'message' => 'Photos fetched successfull.'], 200);
+        return response()->json(['videos' => $videos, 'message' => 'Videos fetched successfull.'], 200);
     }
     /**
-     * remove photos
+     * remove videos
      * @param Request
      * @return $friend
      */
     public function destroy(Request $request){
-        $photo = PostPhoto::find($request->id);
+        $video = PostVideo::find($request->id);
         $userId = auth()->user()->id;
-        if($photo->url !== UserMeta::find($userId)->display_picture){
-            $path = base_path()."\storage\app\public\post-images\\".$userId.'\\'.$photo->name;
-            if(file_exists($path)){
-                unlink($path);
-            }
+        $path = base_path()."\storage\app\public\post-videos\\".$userId.'\\'.$video->name;
+        if(file_exists($path)){
+            unlink($path);
         }
-        $photo->delete();
-        return response()->json(['message' => 'Photo removed.'],200);
+        $video->delete();
+        return response()->json(['message' => 'Video removed.'],200);
     }
 }

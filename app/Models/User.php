@@ -67,7 +67,8 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     public function user_meta(){
         return $this->hasOne(UserMeta::class);
     }
-    public function friend(){
-        return $this->hasOne(Friend::class);
+    public function friends()
+    {
+        return $this->belongsToMany(self::class, 'friends', 'friend_id', 'user_id');
     }
 }

@@ -20,8 +20,12 @@ $router->group(['prefix' => 'api/v1'], function () use ($router) {
         $router->get('privacies', 'V1\UtilitiesController@getPrivacies');
     });
     $router->group(['prefix' => 'photos'], function () use ($router) {
-        $router->get('delete', 'V1\PhotosController@destroy');
+        $router->post('delete', 'V1\PhotosController@destroy');
         $router->get('/', 'V1\PhotosController@photos');
+    });
+    $router->group(['prefix' => 'videos'], function () use ($router) {
+        $router->post('delete', 'V1\VideosController@destroy');
+        $router->get('/', 'V1\VideosController@videos');
     });
     $router->group(['prefix' => 'friends'], function () use ($router) {
         $router->get('requests', 'V1\FriendsController@friendRequests');
@@ -33,7 +37,7 @@ $router->group(['prefix' => 'api/v1'], function () use ($router) {
     $router->group(['prefix' => 'comments'], function () use ($router) {
         $router->get('all', 'V1\CommentsController@index');
         $router->post('add', 'V1\CommentsController@store');
-        $router->post('remove', 'V1\CommentsController@destroy');
+        $router->post('delete', 'V1\CommentsController@destroy');
     });
     // Matches "/api/register
     $router->post('register', 'V1\AuthController@register');
@@ -43,6 +47,7 @@ $router->group(['prefix' => 'api/v1'], function () use ($router) {
     // Matches "/api/profile
     $router->get('profile', 'V1\UserController@profile');
     $router->get('users/{id}', 'V1\UserController@singleUser');
+    $router->post('users/update', 'V1\UserController@update');
 
     //get one user by id
     $router->get('people', 'V1\PeopleController@randomPeople');
