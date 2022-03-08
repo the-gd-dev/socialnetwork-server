@@ -14,6 +14,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Owenoj\LaravelGetId3\GetId3;
 
+use function PHPUnit\Framework\fileExists;
+// public $storageBasePath;
+//   public $storageBaseUri;
+//   public function __construct()
+//   {
+//     $this->storageBasePath = base_path() . "\storage\app\public\\";
+//     $this->storageBaseUri = env('APP_URL') . '/storage/post-videos/';
+//   }
 class PostsController extends Controller
 {
     /**
@@ -21,6 +29,9 @@ class PostsController extends Controller
      *
      * @return void
      */
+    
+    protected $storageBasePath;
+    protected $storageBaseUri;
     protected $post;
     protected $loggedInUser;
     public function __construct(Post $post)
@@ -28,6 +39,8 @@ class PostsController extends Controller
         $this->middleware('auth');
         $this->post = $post;
         $this->user = User::with('user_meta')->find(Auth::user()->id);
+        $this->storageBasePath = base_path() . "\storage\app\public\\";
+        $this->storageBaseUri = env('APP_STORAGE_URI');
     }
     /**
      * Create Authenticated User Post.
@@ -100,8 +113,8 @@ class PostsController extends Controller
                         'mime' => $mime,
                         'size' => filesize($file)
                     ];
-                    $path = $file->move(base_path() . "\storage\app\public\post-images\\" . $this->user->id, $fileName);
-                    $photo['url'] = env('APP_URL') . '/storage/post-images/' . $this->user->id . '/' . $fileName;
+                    $path = $file->move($this->storageBasePath . "\post-images\\" . $this->user->id, $fileName);
+                    $photo['url'] = $this->storageBaseUri . '/post-images/' . $this->user->id . '/' . $fileName;
                     array_push($photos, PostPhoto::create($photo));
                 }
             }
@@ -123,8 +136,8 @@ class PostsController extends Controller
                         'mime' => $videoInfo['mime_type'],
                         'size' => $videoInfo['filesize']
                     ];
-                    $path = $file->move(base_path() . "\storage\app\public\post-videos\\" . $this->user->id, $fileName);
-                    $video['url'] = env('APP_URL') . '/storage/post-videos/' . $this->user->id . '/' . $fileName;
+                    $path = $file->move($this->storageBasePath . "\post-videos\\" . $this->user->id, $fileName);
+                    $video['url'] = $this->storageBaseUri . '/post-videos/' . $this->user->id . '/' . $fileName;
                     array_push($videos, PostVideo::create($video));
                 }
             }
@@ -176,9 +189,18 @@ class PostsController extends Controller
         }
         Comment::where('post_id', $post->id)->delete();
         $photos = PostPhoto::where('post_id', $post->id)->get();
+        $video = PostVideo::where('post_id', $post->id)->first();
+        $videoPath = $this->storageBasePath . "\post-videos\\" . $this->user->id . '\\' . $video->name;
+        if (file_exists($videoPath)) {
+            unlink($videoPath);
+            $video->delete();
+        }
         foreach ($photos as $key => $photo) {
             if ($photo->url !== $this->user->user_meta->display_picture) {
-                unlink(base_path() . "\storage\app\public\post-images\\" . $this->user->id . '\\' . $photo->name);
+                $photoPath = $this->storageBasePath . "\post-images\\" . $this->user->id . '\\' . $photo->name;
+                if (file_exists($photoPath)) {
+                    unlink($photoPath);
+                }
                 $photo->delete();
             }
         }
