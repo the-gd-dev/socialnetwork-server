@@ -48,6 +48,7 @@ $router->group(['prefix' => 'api/v1'], function () use ($router) {
     $router->get('profile', 'V1\UserController@profile');
     $router->get('users/{id}', 'V1\UserController@singleUser');
     $router->post('users/update', 'V1\UserController@update');
+    $router->get('users/search/{query}', 'V1\UserController@searchUsers');
 
     //get one user by id
     $router->get('people', 'V1\PeopleController@randomPeople');
