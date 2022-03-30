@@ -49,14 +49,17 @@ class UserController extends Controller
      */
     public function profile()
     {
-        $user  = auth()->user();
+        $userId  = auth()->user()->id;
+        $user = User::with(['user_meta' => function ($q) {
+            $q->select('user_id', 'display_picture');
+        }])->find($userId);
         return response()->json(['user' => [
             "id" => $user->uuid,
             "first_name" => $user->first_name,
             "middle_name" => $user->middle_name,
             "last_name" => $user->last_name,
             "name" => $user->name,
-            "first_name" => $user->first_name,
+            "user_meta" => $user->user_meta,
         ], 'message' => 'user fetched'], 200);
     }
 
@@ -79,10 +82,10 @@ class UserController extends Controller
         $isFriend = Friend::where('is_friends', '1')
             ->where(function ($q) use ($loggedInUserId, $user) {
                 $q->where('user_id', $loggedInUserId)
-                    ->orWhere('friend_id',  $user->id);
+                    ->where('friend_id',  $user->id);
             })->orWhere(function ($q) use ($loggedInUserId, $user) {
                 $q->where('friend_id', $loggedInUserId)
-                    ->orWhere('user_id',  $user->id);
+                    ->where('user_id',  $user->id);
             })->exists();
         $isFriendRequestSent =  Friend::where('is_friends', '0')->where('user_id', $loggedInUserId)->where('friend_id', $user->id)->exists();
         try {

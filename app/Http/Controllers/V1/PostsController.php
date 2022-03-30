@@ -29,7 +29,7 @@ class PostsController extends Controller
      *
      * @return void
      */
-    
+
     protected $storageBasePath;
     protected $storageBaseUri;
     protected $post;
@@ -190,11 +190,14 @@ class PostsController extends Controller
         Comment::where('post_id', $post->id)->delete();
         $photos = PostPhoto::where('post_id', $post->id)->get();
         $video = PostVideo::where('post_id', $post->id)->first();
-        $videoPath = $this->storageBasePath . "\post-videos\\" . $this->user->id . '\\' . $video->name;
-        if (file_exists($videoPath)) {
-            unlink($videoPath);
-            $video->delete();
+        if ($video) {
+            $videoPath = $this->storageBasePath . "\post-videos\\" . $this->user->id . '\\' . $video->name;
+            if (file_exists($videoPath)) {
+                unlink($videoPath);
+                $video->delete();
+            }
         }
+
         foreach ($photos as $key => $photo) {
             if ($photo->url !== $this->user->user_meta->display_picture) {
                 $photoPath = $this->storageBasePath . "\post-images\\" . $this->user->id . '\\' . $photo->name;
