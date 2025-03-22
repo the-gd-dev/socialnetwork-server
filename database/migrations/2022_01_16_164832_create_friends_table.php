@@ -14,9 +14,9 @@ class CreateFriendsTable extends Migration
     {
         Schema::create('friends', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedInteger('user_id');
+            $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');;
-            $table->bigInteger('friend_id');
+            $table->unsignedBigInteger('friend_id');
             $table->foreign('friend_id')->references('id')->on('users')->onDelete('cascade');;
             $table->bigInteger('relation_id')->nullable();
             $table->enum('relation_confirmation', [0,1])->default(0);

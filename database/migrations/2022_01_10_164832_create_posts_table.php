@@ -14,7 +14,7 @@ class CreatePostsTable extends Migration
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedInteger('user_id');
+            $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');;
             $table->longText('text');
             $table->enum('privacy_id', [0,1,2,3])->default(0)->comment('0 = public, 1 = friends , 2 = private, 3 = close friends');
